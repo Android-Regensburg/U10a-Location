@@ -1,30 +1,73 @@
-# Android Basisapplikation
-
-Dieses Repository dient als Vorlage für die Übungsaufgaben des Android-Kurses. Im `master`-Branch des
-Repositorys befindet sich das Starterpaket, das als Ausgangslage für die Bearbeitung durch die Studierenden
-dient. Die Aufgabenbeschreibung wird in der `Readme.md`-Datei verfasst. Zugehörige Dateien, z.B. Bilder
-oder Videos, werden im Ordner `/docs` abgelegt. Der fertige Lösungsvorschlag wird auf Basis des Starterpakets
-in einem separaten Branch `solution` gepflegt. **Dieser Abschnitt wird durch eine kurze Beschreibung der
-jeweiligen Aufgabe ersetzt. Unter der Kurzbeschreibung wird ein aussagekräftiger Screenshot der zu
-entwickelnden Anwendung platziert.**
+# U10a | Location
 
 ## Downloads
 
-- [Download des Starterpakets](Link zum direkten Download des Master-Branch)
-- [Download des Lösungsvorschlag](Link zum direkten Download des Solution-Branch)
+- [Download des Starterpakets](https://github.com/Android-Regensburg/U10a-Location/archive/master.zip)
+- [Download des Lösungsvorschlag](https://github.com/Android-Regensburg/U10a-Location/archive/solution.zip)
 
-## Aufgabenbeschreibung
+## Aufgabe
 
-Hier folgt die Aufgabenbeschreibung auf Basis des ursprünglichen Handouts.
+Erstellen Sie eine simple Anwendung auf Basis der Location Based Service-Inhalte, die es dem Benutzer erlaubt die aktuelle Position des Geräts zu speichern. 
 
----
+## Hinweise
 
-## Hinweise zur Arbeit mit dieser Vorlage
+* LBS: Sie benötigen den `LocationManager` für die Abfragen der aktuellen Position und das `Location`-Object zur Speicherung der Ortsinformationen und zur Berechnung von Distanz und Richtung. Informationen und Beispiele finden Sie in den aktuellen Vorlesungsfolien.
 
-1. Für jede Aufgabe wird ein neues Repository in der Organisation `Android-Regensburg` erstellt. Grundlage (*Template*) ist [dieses Repository](https://github.com/Android-Regensburg/Template-Uebungsaufgaben).
-2. Die Repositorys werden einheitlich nach dem Muster `U` + laufende Nummer + `-` + Name der Übung benannt.
-3. Im Master-Branch werden Aufgabenbeschreibung (*Readme*) und Starter-Code ergänzt.
-4. Eingefügte Aufgabenbeschreibung und Starter-Code werden *committet* (Commit-Message: *Initialer Commit mit Aufgabenbeschreibung und Starterpaket*).
-5. Auf Basis des Master-Branch wird eine neue Branch `solution` erstellt. Dort wird der bestehende Code mit dem Lösungsvorschlag ergänzt und *comittet* (Commit-Message: *Lösungsvorschlag ergänzt*).
+* Permissions: Denken Sie daran, im Manifest die nötigen Permissions für den Zugriff auf den `LocationProvider` einzutragen. Außerdem muss der Benutzer bestätigen, dass die App berechtigt ist auf diesen zuzugreifen.
 
-Da Code und Repository ggf. auch den Studierenden zugänglich gemacht werden, werden Commit-Messages, Issues und In-Code-Kommentare auf Deutsch verfasst.
+* Überprüfen Sie in Ihrem Smartphone unter Einstellungen -> Apps -> NavigationDemo ob die Berechtigungen angezeigt werden.
+
+* Überprüfen Sie ob der Zugriff auf den Standort auf Ihrem Gerät gewährt wird.
+
+## Vorgehen
+
+## Anleitung
+
+### Erste Schritte
+
+1. Laden Sie das vorgegebene Projekt herunter und öffnen Sie es. Das Layout muss nicht geändert werden. Große Teile des Codes sind bereits vorgegeben. Schauen Sie sich alle Klassen sowie den vorgegebenen Code genau an, bevor Sie mit der Implementierung beginnen.
+
+2. Das Android Manifest muss um die Permission für die Abfrage des Standortes ergänzt werden (in diesem Fall wollen wir Fine_Location).
+
+### Main Activity 
+
+1. Als Erstes müssen Sie prüfen, ob die nötigen Berechtigungen vom User erteilt wurden, damit Sie in der App später auf die Location zugreifen können. Das machen Sie bevor Sie Ihre Views und Variablen initialisieren. Über `ContextCompat.checkSelfPermission` können Sie die benötigten Berechtigungen abfragen. Diese muss dann mit `PackageManager.PERMISSION_GRANTED` verglichen werden. Haben Sie die benötigte Berechtigung erhalten, können Sie die App nun initialisieren. Wennnicht, starten Sie eine Anfrage, um die benötigten Rechte zu erhalten. Die Abfrage starten wir über die `ActivityCompat` Klasse mit requestPermission.
+
+2. Nun muss die Antwort auf die Frage, ob der User die Permissions erteilen will, richtig abgefangen werden. Dafür überschreiben Sie die Callback-Methode `onRequestPermissionsResult` und überprüfen den `requestcode`. Da wir nur eine Permission anfragen, reicht es die erste Stelle des Arrays `grantResults` zu überprüfen. Wenn die Permission erteilt wurde, können Sie mit den nächsten Schritten anfangen.
+
+3. `initUI()` soll den Button mit einem OnClick Listener belegen und den Listview Adapter und die dazugehörige ArrayList initialisieren. Der Button soll zwischen Start und Stop wechseln. Dabei wechselt er seine Schrift und Farbe und stoppt und startet die Location Abfrage über den `NavigationController`.
+
+4. Benutzen Sie `modifyButtonLayout`, um die Farbe und die Schrfit des Buttons zu verändern.
+
+5. `saveCurrentPosition()` soll die aktuelle Location über den `NavigationController` abrufen und in der `ArrayList` `saved_location` speichern
+
+### NavigationController
+
+1. In `init()` wird der `LocationManager` über den übergebenen `Context` mit der Methode `getSystemService` referenziert und die letzte bekannte Position des GPS-Providers ausgelesen und genutzt, um `lastLocation` mit einem Wert zu belegen. Bevor sie mit `getLastKnownLocation` die letzte bekannte Position ermitteln, müssen sie einen Provider bestimmen (siehe `setBestProvider` Methode im nächsten Punkt).
+
+2. Ergänzen Sie die Methode `setBestProvider()`, die keine Parameter erwartet und nichts zurückgibt. Erzeugen Sie in `setBestProvider` eine lokale Variable vom Typ `Criteria` und legen Sie eine Reihe an Kriterien für ihren Provider fest: Der resultierende String wird dann in der passenden Variable gespeichert.
+
+3. `start()`: hier wird der `LocationListener` initialisiert und die Methode des LocationManagers `requestLocationUpdates` aufgerufen, um die Locations regelmäßig zu aktualisieren.
+
+4. In `stop()` soll der `LocationListener` aufhören auf Updates zu lauschen.
+
+### NavigationListener
+
+1. Der `NavigationController` ermittelt zwar nun regelmäßig Location Updates und speichert diese in seiner Variablen, aber die `MainAcitivity` bekommt davon nichts mit und updatet darum nicht die Liste mit den Locations.
+
+2. Erstellen Sie deswegen ein neues Interface namens `NavigationListener`.
+
+3. Implementieren Sie die benötigten Methoden.
+
+4. Referenzieren Sie das Interface richtig in der `MainActivity` und dem `NavigationController`. Der `NavgationController` soll mit Hilfe des Interfaces die `MainActivity` über Updates benachrichtigen.
+
+5. Rufen Sie die Methoden des Interfaces in `NavigationController` an geeigneten Positionen auf.
+
+6. Implementieren und überschreiben Sie die notwendigen Methoden des Interfaces in der `MainActivity`.
+
+## Anhang
+### Screenshots
+
+![Screenshot der zehnten App](./docs/screenshot-1.png "Abfrage der Berechtigung")
+
+![Screenshot der zehnten App](./docs/screenshot-2.png "Anzeige der Positionsdaten")
